@@ -1,0 +1,200 @@
+---
+title: "portfolio 2.1"
+output: html_notebook
+---
+#Portfolio assignment 2.1 
+#getting abundance data for 3 counties 
+```{r}
+chatham <- BIEN_occurrence_county(country="United States", state="Georgia", county = "Chatham")
+head(chatham)
+tail(chatham)
+fulton <- BIEN_occurrence_county(country="United States", state="Georgia", county = "Fulton")
+head(fulton)
+tail(fulton)
+attributes(fulton)
+cobb <- BIEN_occurrence_county(country="United States", state="Georgia", county = "Cobb")
+head(cobb)
+tail(cobb)
+attributes(cobb)
+```
+```{r}
+#now we will trim down this data set and rename it so we can work with just county data 
+chatham.occ=chatham[c(1)]
+head(chatham.occ)
+fulton.occ=fulton[c(1)]
+head(fulton.occ)
+cobb.occ=cobb[c(1)]
+head(cobb.occ)
+#now we have 3 species occurence lists, we will turn them into species abundance lists by re-using the same code that we just made
+chatham.ab=count(chatham.occ)
+head(chatham.ab)
+fulton.ab=count(fulton.occ)
+head(fulton.ab)
+cobb.ab=count(cobb.occ)
+head(cobb.ab) 
+#now we will rename the columns 
+chatham.ab=data.frame("chatham", chatham.ab)
+head(chatham.ab)
+names(chatham.ab)<-c("ListID", "SpeciesID", "Freq")
+head(chatham.ab)
+fulton.ab=data.frame("fulton", fulton.ab)
+head(fulton.ab)
+names(fulton.ab)<-c("ListID", "SpeciesID", "Freq")
+head(fulton.ab)
+cobb.ab=data.frame("cobb", cobb.ab)
+head(cobb.ab)
+names(cobb.ab)<-c("ListID", "SpeciesID", "Freq")
+head(cobb.ab)
+threecounty.ab=rbind(chatham.ab, fulton.ab, cobb.ab)
+head(threecounty.ab)
+tail(threecounty.ab)
+dim(threecounty.ab)
+#make a matrix
+urban.ab<-matrify(threecounty.ab)
+urban.ab
+#looking at the dimensions of the matrix
+dim(urban.ab)
+simpson<-diversity(urban.ab, index = "simpson")
+shannon<-diversity(urban.ab, index = "shannon")
+simpson
+shannon
+bray = vegdist(urban.ab, "bray")
+bray
+jaccard = vegdist(urban.ab, "jaccard", binary=T)
+jaccard
+```
+```{r}
+write.csv(threecounty.ab, file = "threecounty.csv")
+```
+```{r}
+write.csv(urban.ab, file = "urban.csv")
+```
+#These diversity indices that we computed can tell us how to interpret the diversity within and between the three different counties. The Shannon index is typically a value between 1.5 and 3.5 and increases as both richness and evenness of the community increase. From the values that I retrieved I can conclude that Chatham and Fulton county have the most even richness across the three lists. This value can make it difficult to compare communities that differ greatly in richness. This is why we also computed the Simpson index, which can give us the probability that any two random individuals belong to the same species. From the test I ran I can conclude that chatham county has the highest probability of having two individuals that belong to the same species. Finally, the last index we retrieved was Jaccard's index, which can give us an intuitive measure of similarity between two samples and summarize the fraction of species they share. From the data I can conclude that fulton and chatam couny are most similar and fulton and cobb are the least similar. 
+```{r}
+#now we will analyze our own imported plant lists, the first list contains plants I use in my day to day life  
+write.csv(dailyplantlist, file = "dailyplantlist.csv")
+```
+```{r}
+MH=read.csv("dailyplantlist.csv")
+head(MH)
+tail(MH)
+```
+
+```{r}
+#pasting two columns together
+speciesID=paste(MH$Scientific, MH$Name, sep=" ")
+speciesID
+```
+```{r}
+#giving them headings
+names(MH)<-c("ListID", "SpeciesID", "Freq")
+#getting occurence data 
+MH_list=count(speciesID)
+head(MH_list)
+MH_list=data.frame(MH_list)
+MH_list=data.frame("MH", MH_list)
+head(MH_list)
+```
+```{r}
+#give them headings 
+names(MH_list)<-c("ListID", "SpeciesID", "Freq")
+```
+
+```{r}
+ #Now I'm going to repeat that for my second sample, this is a list of plants in an area local to me in new york city
+write.csv(welikia, file = "welikia.csv")
+
+```
+```{r}
+WPS=read.csv("welikia.csv")
+head(WPS)
+tail(WPS)
+```
+```{r}
+#binding columns
+speciesID=paste(WPS$Scientific, WPS$Name, sep=" ")
+speciesID
+```
+```{r}
+#giving them headings
+names(WPS)<-c("ListID", "SpeciesID", "Freq")
+#getting occurence data 
+WPS_list=count(speciesID)
+head(WPS_list)
+WPS_list=data.frame(WPS_list)
+WPS_list=data.frame("WPS", WPS_list)
+head(WPS_list)
+```
+```{r}
+names(WPS_list)<-c("ListID", "SpeciesID", "Freq")
+```
+
+```{r}
+#now we are going to combine the lists 
+Welikia=rbind(WPS_list, MH_list)
+dim(Welikia)
+#Now we are goint to create a matrix which will allow us to compare lists to eachother!!! so cool 
+wab=matrify(Welikia)
+wab
+```
+```{r}
+#now we can compute a diversity index between these two lists 
+simpson<-diversity(wab, index = "simpson")
+shannon<-diversity(wab, index = "shannon")
+simpson
+shannon
+jaccard = vegdist(wab, "jaccard")
+jaccard
+bray = vegdist(wab, "bray")
+bray
+```
+#we just computed the Simpson, Shannon and Jaccard indices that we completed for the 3 counties, however to complete the assignment we have to compare 3 lists and not 2 so I wll add another
+```{r}
+#this third list is the list of plants from my article
+write.csv(articlelist, file = "articlelist.csv")
+```
+
+```{r}
+AS=read.csv("articlelist.csv")
+head(AS)
+tail(AS)
+```
+```{r}
+#combining columns
+speciesID=paste(AS$Scientific, AS$Name, sep=" ")
+speciesID
+```
+```{r}
+#headings and occurence data 
+names(AS)<-c("ListID", "SpeciesID", "Freq")
+#getting occurence data 
+AS_list=count(speciesID)
+head(AS_list)
+AS_list=data.frame(AS_list)
+AS_list=data.frame("AS", AS_list)
+head(AS_list)
+
+```
+```{r}
+names(AS_list)<-c("ListID", "SpeciesID", "Freq")
+```
+```{r}
+#NOW WE ARE GOING TO COMBINE ALL THREE LISTS!!! hooray 
+Welikia=rbind(WPS_list, MH_list, AS_list)
+dim(Welikia)
+#matrify
+wab=matrify(Welikia)
+wab
+```
+```{r}
+#now we can compute a diversity index between these two lists 
+simpson<-diversity(wab, index = "simpson")
+shannon<-diversity(wab, index = "shannon")
+simpson
+shannon
+jaccard = vegdist(wab, "jaccard")
+jaccard
+bray = vegdist(wab, "bray")
+bray
+```
+So now that we compared three different lists we can use the diversity indices to tell a little more about what is going on. The shannon index here is pretty high, meaning that there is highest abundance and eveness in the list I cleaned from Welikia, which makes sense since this list had more species in it, and was specific to a region in new york, whereas my other lists were smaller, and pretty random.The simpson index here is also really high, which tells that there is similarity between across all three lists. The Jaccard index is also really high, which indicates that my daily plant list and my article plant list differ the most from eachother, and that my daily plant list and my welikia plant list are very similar in the sense that they share a similar number of species, as do the welikia list and the article list. 
